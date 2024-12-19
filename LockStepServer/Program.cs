@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LockStepServer.Server;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace LockStepServer
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("你好世界");
+            UdpServer.Start();
         }
     }
 }
