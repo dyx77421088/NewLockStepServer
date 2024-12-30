@@ -2,6 +2,10 @@
 using System.Diagnostics;
 using System.IO;
 using System;
+using System.Collections.Generic;
+using Commit.Utils;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace LockStepServer
 {
@@ -9,14 +13,36 @@ namespace LockStepServer
     {
         static void Main(string[] args)
         {
-            // UdpServer.Start();
+            UdpServer.Start();
 
+            // protobuf转c#
             //Protobuf2Cs();
 
-            User user = new User();
-            user.Name = "Test";
-            user.Password = "123345";
-            Console.WriteLine(user);
+            // 2236
+            //new Timer(TimerCallback, null, 0, 1); // 定时器
+            Console.Read();
+        }
+        private static List<Operate> frames = new List<Operate>();
+        private static Operate currentOperate;
+        private static int idx;
+        private static void TimerCallback(Object o)
+        {
+            Console.WriteLine(idx++ + " " + currentOperate);
+            BaseResponse response = new BaseResponse()
+            {
+                ResponseType = ResponseType.RtOperate,
+                ResponseData = ResponseData.RdOperate,
+                Operate = currentOperate,
+            };
+            frames.Add(ProtoBufUtils.DeSerializeBaseResponse(ProtoBufUtils.SerializeBaseResponse(response)).Operate);
+            currentOperate = new Operate();
+            currentOperate.FrameId = idx;
+            currentOperate.Move.Add(new Move()
+            {
+                UserId = 1,
+                MoveX = (float)new Random().NextDouble(),
+                MoveY = (float)new Random().NextDouble(),
+            });
         }
 
         // .proto转换为csharp

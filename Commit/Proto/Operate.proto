@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+message Move {
+    int32 userId = 1;
+    float moveX = 2;
+    float moveY = 3;
+}
+message Operate {
+    int32 frameId = 1;
+    repeated Move move = 2;
+}

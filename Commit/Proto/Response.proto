@@ -1,0 +1,49 @@
+syntax = "proto3";
+// 导入外部的proto文件
+import "User.proto"; 
+import "Status.proto";
+import "Matching.proto";
+import "Operate.proto";
+import "ChasingFrames.proto";
+
+// 请求的类型
+enum ResponseType {
+     // 未知响应
+    RT_UNKNOWN = 0;
+     // 登陆响应
+    RT_LOGIN = 1;
+    // 匹配响应
+    RT_MATCH = 2;
+    // operate
+    RT_OPERATE = 3;
+}
+// 夹带的参数（也就是data的类型）
+enum ResponseData {
+    // 未知类型
+    RD_UNKNOWN = 0; 
+    // 类型为User
+    RD_USER = 1; 
+    // 类型为status
+    RD_STATUS = 2;
+    // 类型为matching
+    RD_MATCH = 3;
+    // 类型为operate
+    RD_OPERATE = 4;
+    // 类型为ChasingFrames
+    RD_CHASINGFRAMES = 5;
+}
+// 基础请求类型
+message BaseResponse {
+    // 是谁发送的请求(也就是userId)
+    int32 userId = 1; 
+    ResponseType responseType = 2;
+    ResponseData responseData = 3;
+    // oneof表示这里面的占用相同的地址
+    oneof data { 
+        User user = 4;
+        Status status = 5;
+        Matching matching = 6;
+        Operate operate = 7;
+        ChasingFrames chasingFrames = 8;
+    }
+}

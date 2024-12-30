@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+// 返回的状态的类型
+enum StatusType {
+    // 错误
+    ST_ERROR = 0; 
+    // 成功
+    ST_SUCCESS = 1;
+    // 重连
+    ST_RELOAD = 2;
+}
+message Status {
+    int32 id = 1;
+    string msg = 2;
+    StatusType st = 3;
+}

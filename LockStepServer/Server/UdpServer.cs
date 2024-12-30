@@ -1,20 +1,20 @@
 ﻿using Commit.Config;
+using Commit.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml.Linq;
 
 namespace LockStepServer.Server
 {
-    public class UdpServer
+    public partial class UdpServer
     {
         private static UdpClient udpServer = new UdpClient(NetConfig.UDP_PORT);
-        // 用来存放客户端的连接
-        private static List<IPEndPoint> clients = new List<IPEndPoint>();
         public static void Start()
         {
             Console.WriteLine("UDP 聊天服务器已启动，等待消息...");
@@ -45,9 +45,9 @@ namespace LockStepServer.Server
                 try
                 {
                     byte[] receivedData = udpServer.Receive(ref clientEndPoint);
-                    Console.WriteLine(Encoding.UTF8.GetString(receivedData));
+                    BaseRequest requset = ProtoBufUtils.DeSerializeBaseRequest(receivedData);
                     // 处理接收到的消息
-                    HandleLoginMessage(receivedData, clientEndPoint);
+                    HandleReceivedData(requset, clientEndPoint);
                 }
                 catch (SocketException ex)
                 {
@@ -59,30 +59,38 @@ namespace LockStepServer.Server
                 }
             }
         }
-        /// <summary>
-        /// 处理接收到的消息
-        /// </summary>
-        /// <param name="msg">消息</param>
-        /// <param name="client">发送这个消息的客户端</param>
-        private static void HandleBroadcastMessage()
+        // 根据不同的请求类型和数据类型到对应的处理
+        private static void HandleReceivedData(BaseRequest request, IPEndPoint client)
         {
-
+            if (request.RequestType == RequestType.RtLogin) // 如果是登陆请求
+            {
+                if (request.RequestData == RequestData.RdUser) // 且携带的数据是user
+                {
+                    HandleLoginMessage(request, client); // 处理登陆请求
+                }
+            }
+            else if (request.RequestType == RequestType.RtMatch)
+            {
+                if (request.RequestData == RequestData.RdMatch)
+                {
+                    HandleMatching(request, client); // 处理登陆请求
+                }
+                else if (request.RequestData == RequestData.RdStatus)
+                {
+                    if (request.Status.St == StatusType.StReload)
+                    {
+                        HandleReLoad(request, client); // 追帧
+                    }
+                }
+            }
+            else if (request.RequestType == RequestType.RtOperate)
+            {
+                if (request.RequestData == RequestData.RdOperate)
+                {
+                    HandleOperate(request, client); // 处理玩家发送过来的操作
+                }
+            }
         }
 
-        private static void HandleLoginMessage(byte[] loginInfo, IPEndPoint client)
-        {
-            string[] strs = Encoding.UTF8.GetString(loginInfo).Split(' ');
-            string message = CheckLogin(strs[0], strs[1]) ? "登陆成功" : "用户名或密码错误";
-            byte[] msg = Encoding.UTF8.GetBytes(message);
-            udpServer.Send(msg, msg.Length, client);
-        }
-
-        private static bool CheckLogin(string userName, string password)
-        {
-            if ("张三".Equals(userName) && "123456".Equals(password)) return true;
-            else if ("里斯".Equals(userName) && "666666".Equals(password)) return true;
-            else if ("admin".Equals(userName) && "admin".Equals(password)) return true;
-            return false;
-        }
     }
 }

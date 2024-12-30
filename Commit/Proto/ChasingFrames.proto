@@ -1,0 +1,6 @@
+syntax = "proto3";
+import "Operate.proto";
+// ׷֡
+message ChasingFrames {
+    repeated Operate operates = 1;
+}
